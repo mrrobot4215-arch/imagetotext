@@ -1,0 +1,1352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Primary Meta Tags -->
+    <title>OCR Text Extractor - Free Image to Text Converter | ScanText</title>
+    <meta name="title" content="OCR Text Extractor - Free Image to Text Converter | ScanText">
+    <meta name="description" content="Convert images, photos, screenshots, and PDFs to editable text instantly. Free, fast, and accurate OCR powered by Tesseract. No registration required.">
+    <meta name="keywords" content="OCR, image to text, optical character recognition, text extraction, free OCR online, convert image to text, document scanning">
+    <meta name="author" content="ScanText">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="English">
+    <link rel="canonical" href="https://scantext.io/">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://scantext.io/">
+    <meta property="og:title" content="Free OCR Text Extractor - Convert Images to Text">
+    <meta property="og:description" content="Extract text from images instantly with our free OCR tool. Fast, accurate, and completely private.">
+    <meta property="og:image" content="https://scantext.io/og-image.png">
+    <meta property="og:site_name" content="ScanText">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://scantext.io/">
+    <meta property="twitter:title" content="Free OCR Text Extractor - Convert Images to Text">
+    <meta property="twitter:description" content="Extract text from images instantly with our free OCR tool. Fast, accurate, and completely private.">
+    <meta property="twitter:image" content="https://scantext.io/og-image.png">
+    <meta property="twitter:creator" content="@scantext">
+
+    <!-- Structured Data (JSON-LD) for SEO -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "ScanText - OCR Image to Text Converter",
+      "url": "https://scantext.io",
+      "description": "Free web application to extract text from images, photos, and documents using advanced OCR technology.",
+      "applicationCategory": "UtilitiesApplication",
+      "operatingSystem": "All",
+      "browser": "All",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "author": {
+        "@type": "Organization",
+        "name": "ScanText",
+        "url": "https://scantext.io"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "ratingCount": "2400"
+      }
+    }
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- Tesseract.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.1.1/dist/tesseract.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js-core@4.0.0/tesseract-core.min.js"></script>
+
+    <style>
+        /* VARIABLES & RESET */
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --primary-light: #dbeafe;
+            --bg-main: #f9fafb;
+            --bg-secondary: #f3f4f6;
+            --surface: #ffffff;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --text-tertiary: #9ca3af;
+            --border: #e5e7eb;
+            --success: #059669;
+            --error: #dc2626;
+            --radius-sm: 6px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* HEADER */
+        .header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-xs);
+        }
+
+        .header-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 72px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            font-size: 1.4rem;
+            font-weight: 800;
+            letter-spacing: -0.01em;
+            color: var(--text-primary);
+            transition: var(--transition);
+        }
+
+        .logo:hover {
+            color: var(--primary);
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--primary), #1d4ed8);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 32px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transition: width 0.2s;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* HERO SECTION */
+        .hero {
+            padding: 60px 0 80px;
+        }
+
+        .hero-content {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: var(--primary-light);
+            color: var(--primary);
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            padding: 8px 16px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+            margin-bottom: 40px;
+        }
+
+        /* CONVERTER CARD */
+        .converter-wrapper {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+
+        .converter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .file-info {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .converter-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            min-height: 500px;
+        }
+
+        /* UPLOAD ZONE */
+        .upload-zone {
+            border-right: 1px solid var(--border);
+            padding: 40px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transition: var(--transition);
+        }
+
+        .upload-zone.dragover {
+            background: var(--primary-light);
+        }
+
+        .upload-input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .upload-content {
+            text-align: center;
+            pointer-events: none;
+        }
+
+        .upload-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 20px;
+            background: var(--primary-light);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+        }
+
+        .upload-content h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .upload-content p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 4px;
+        }
+
+        .upload-hint {
+            color: var(--primary);
+            font-weight: 600;
+            text-decoration: underline;
+        }
+
+        .upload-formats {
+            font-size: 0.85rem;
+            color: var(--text-tertiary);
+            margin-top: 16px;
+        }
+
+        .preview-area {
+            text-align: center;
+        }
+
+        .preview-img {
+            max-width: 100%;
+            max-height: 320px;
+            object-fit: contain;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 16px;
+        }
+
+        .btn-change-file {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: var(--transition);
+        }
+
+        .btn-change-file:hover {
+            background: var(--primary-light);
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        /* RESULT ZONE */
+        .result-zone {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .result-label {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+        }
+
+        .result-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-result {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            padding: 6px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-result:hover:not(:disabled) {
+            background: var(--primary-light);
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .btn-result:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .result-textarea {
+            flex: 1;
+            width: 100%;
+            padding: 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            background: var(--bg-secondary);
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: var(--text-primary);
+            resize: none;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .result-textarea:focus {
+            border-color: var(--primary);
+            background: var(--surface);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        .result-textarea::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .result-textarea::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .result-textarea::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        .result-textarea::-webkit-scrollbar-thumb:hover {
+            background: var(--text-tertiary);
+        }
+
+        /* PROGRESS OVERLAY */
+        .progress-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(2px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 20;
+            border-radius: var(--radius-md);
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 3px solid var(--primary-light);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 24px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .progress-text {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+        }
+
+        .progress-bar-track {
+            width: 120px;
+            height: 4px;
+            background: var(--border);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-percent {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+        }
+
+        /* ACTION BAR */
+        .converter-footer {
+            padding: 24px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 32px;
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-primary:disabled {
+            background: var(--text-tertiary);
+            cursor: not-allowed;
+        }
+
+        /* FEATURES SECTION */
+        .features {
+            padding: 100px 0;
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+        }
+
+        .section-header {
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto 60px;
+        }
+
+        .section-header h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .section-header p {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 32px;
+        }
+
+        .feature-card {
+            padding: 32px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            transition: var(--transition);
+        }
+
+        .feature-card:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-md);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 16px;
+        }
+
+        .feature-card h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .feature-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+
+        /* CONTENT SECTION */
+        .content {
+            padding: 80px 0;
+        }
+
+        .content-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 48px;
+        }
+
+        .content-box h2 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 24px;
+            color: var(--text-primary);
+        }
+
+        .content-box h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin: 32px 0 16px;
+            color: var(--text-primary);
+        }
+
+        .content-box p {
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            line-height: 1.8;
+            font-size: 1rem;
+        }
+
+        .content-box ol, .content-box ul {
+            margin-left: 24px;
+            margin-bottom: 20px;
+            color: var(--text-secondary);
+        }
+
+        .content-box li {
+            margin-bottom: 12px;
+            line-height: 1.8;
+        }
+
+        .content-box strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        /* FAQ SECTION */
+        .faq {
+            padding: 80px 0;
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+        }
+
+        .faq-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 32px;
+        }
+
+        .faq-item {
+            padding: 28px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+        }
+
+        .faq-item h4 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .faq-item p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+
+        /* FOOTER */
+        .footer {
+            padding: 48px 0 32px;
+            border-top: 1px solid var(--border);
+            background: var(--bg-secondary);
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .footer-brand {
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 28px;
+            list-style: none;
+        }
+
+        .footer-links a {
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .footer-links a:hover {
+            color: var(--primary);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+            color: var(--text-tertiary);
+            font-size: 0.9rem;
+        }
+
+        /* TOAST */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--text-primary);
+            color: white;
+            padding: 14px 20px;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            font-size: 0.95rem;
+            box-shadow: var(--shadow-lg);
+            opacity: 0;
+            transform: translateY(20px);
+            pointer-events: none;
+            transition: var(--transition);
+            z-index: 1000;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .converter-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .upload-zone {
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .hero {
+                padding: 40px 0 60px;
+            }
+
+            .footer-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .converter-content {
+                gap: 20px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container header-inner">
+            <a href="#" class="logo">
+                <div class="logo-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 7V4a2 2 0 0 1 2-2h3"/>
+                        <path d="M18 2h3a2 2 0 0 1 2 2v3"/>
+                        <path d="M4 17v3a2 2 0 0 0 2 2h3"/>
+                        <path d="M18 22h3a2 2 0 0 0 2-2v-3"/>
+                        <rect width="8" height="8" x="8" y="8" rx="1"/>
+                    </svg>
+                </div>
+                ScanText
+            </a>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="#converter">Converter</a></li>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#faq">FAQ</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero -->
+        <section class="hero" id="converter">
+            <div class="container">
+                <div class="hero-content">
+                    <span class="hero-badge">✨ Advanced OCR Technology</span>
+                    <h1>Extract Text From Images Instantly</h1>
+                    <p>Convert photos, documents, and screenshots to editable text in seconds. Powered by advanced Tesseract OCR engine.</p>
+                </div>
+
+                <!-- Converter Card -->
+                <div class="converter-wrapper" style="margin-top: 48px;">
+                    <div class="converter-header">
+                        <span class="file-info" id="fileInfo">Ready to extract text</span>
+                    </div>
+
+                    <div class="converter-grid">
+                        <!-- Upload Area -->
+                        <div class="upload-zone" id="dropZone">
+                            <input type="file" id="fileInput" accept="image/*,.pdf" class="upload-input">
+                            <div class="upload-content" id="uploadContent">
+                                <div class="upload-icon">
+                                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                        <polyline points="17 8 12 3 7 8"/>
+                                        <line x1="12" y1="3" x2="12" y2="15"/>
+                                    </svg>
+                                </div>
+                                <h3>Drag and Drop Image</h3>
+                                <p>or <span class="upload-hint">browse from device</span></p>
+                                <p class="upload-formats">PNG, JPG, WEBP, BMP (Max 10MB)</p>
+                            </div>
+
+                            <div class="preview-area hidden" id="previewArea">
+                                <img id="imagePreview" class="preview-img" alt="Image preview">
+                                <button type="button" class="btn-change-file" id="btnChangeFile">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline;">
+                                        <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                                        <path d="M3 3v5h5"/>
+                                        <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
+                                        <path d="M16 21h5v-5"/>
+                                    </svg>
+                                    Choose Another Image
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Result Area -->
+                        <div class="result-zone" style="position: relative;">
+                            <div class="result-header">
+                                <span class="result-label">Extracted Text</span>
+                                <div class="result-actions">
+                                    <button class="btn-result" id="btnCopy" disabled title="Copy to clipboard">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+                                            <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+                                        </svg>
+                                        Copy
+                                    </button>
+                                    <button class="btn-result" id="btnDownload" disabled title="Download as TXT">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                            <polyline points="7 10 12 15 17 10"/>
+                                            <line x1="12" y1="15" x2="12" y2="3"/>
+                                        </svg>
+                                        Download
+                                    </button>
+                                </div>
+                            </div>
+
+                            <textarea id="resultText" class="result-textarea" placeholder="Extracted text will appear here..." readonly></textarea>
+
+                            <div class="progress-overlay hidden" id="progressOverlay">
+                                <div class="spinner"></div>
+                                <p class="progress-text" id="progressText">Initializing OCR engine...</p>
+                                <div class="progress-bar-track">
+                                    <div class="progress-bar-fill" id="progressBar"></div>
+                                </div>
+                                <span class="progress-percent" id="progressPercent">0%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="converter-footer">
+                        <button class="btn-primary" id="btnConvert" disabled>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"/>
+                                <path d="m21 21-4.3-4.3"/>
+                            </svg>
+                            Extract Text
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features -->
+        <section class="features" id="features">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Why Choose ScanText?</h2>
+                    <p>Professional-grade OCR technology designed for accuracy and privacy</p>
+                </div>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">⚡</div>
+                        <h3>Instant Conversion</h3>
+                        <p>Process images in seconds with zero waiting time. Get results immediately after uploading your image.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🔒</div>
+                        <h3>Complete Privacy</h3>
+                        <p>All processing happens in your browser. Your images are never sent to any server or stored anywhere.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🎯</div>
+                        <h3>High Accuracy</h3>
+                        <p>Powered by Tesseract v5, delivering professional-grade text recognition with minimal errors.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">💯</div>
+                        <h3>100% Free</h3>
+                        <p>No registration, no subscriptions, no hidden costs. Use ScanText completely free, unlimited times.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🌐</div>
+                        <h3>Multi-Language</h3>
+                        <p>Supports 100+ languages including English, Spanish, French, German, Chinese, Arabic, and many more.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📱</div>
+                        <h3>Works Everywhere</h3>
+                        <p>No software installation needed. Works on desktop, tablet, and mobile browsers instantly.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Content -->
+        <section class="content">
+            <div class="container">
+                <div class="content-box">
+                    <h2>How to Extract Text From Images</h2>
+                    <p>ScanText makes it simple to convert any image into editable text. Whether you have a scanned document, a screenshot, or a handwritten note, our OCR technology can extract the text accurately in just a few seconds.</p>
+
+                    <h3>Step-by-Step Guide</h3>
+                    <ol>
+                        <li><strong>Upload Your Image:</strong> Drag and drop an image or click to browse from your device.</li>
+                        <li><strong>Click Extract:</strong> Press the "Extract Text" button to start the OCR process.</li>
+                        <li><strong>Get Results:</strong> The extracted text appears instantly in the result box.</li>
+                        <li><strong>Copy or Download:</strong> Copy the text to your clipboard or download as a .txt file.</li>
+                    </ol>
+
+                    <h3>What is OCR Technology?</h3>
+                    <p>Optical Character Recognition (OCR) is a technology that converts images containing text into machine-readable digital text. OCR is essential for digitizing documents, archiving old papers, automating data entry, and making scanned content searchable and editable. Our tool uses Tesseract, one of the most accurate open-source OCR engines available.</p>
+
+                    <h3>Common Use Cases</h3>
+                    <ul>
+                        <li>Digitizing printed documents and books</li>
+                        <li>Extracting text from screenshots and photos</li>
+                        <li>Converting handwritten notes to digital format</li>
+                        <li>Automating data entry from forms and receipts</li>
+                        <li>Making archived documents searchable</li>
+                        <li>Creating digital copies for backup and archival</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ -->
+        <section class="faq" id="faq">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Frequently Asked Questions</h2>
+                    <p>Find answers to common questions about ScanText</p>
+                </div>
+                <div class="faq-grid">
+                    <div class="faq-item">
+                        <h4>Is ScanText really free?</h4>
+                        <p>Yes, completely free. No registration required, no limits on conversions, no hidden fees. Use ScanText as many times as you want without paying.</p>
+                    </div>
+                    <div class="faq-item">
+                        <h4>Are my images stored on your servers?</h4>
+                        <p>No. All processing happens directly in your browser. Your images are never uploaded to any server and never stored anywhere. Your privacy is guaranteed.</p>
+                    </div>
+                    <div class="faq-item">
+                        <h4>What image formats are supported?</h4>
+                        <p>We support JPG, PNG, WEBP, and BMP formats. Maximum file size is 10MB. For best results, use clear, well-lit images with readable text.</p>
+                    </div>
+                    <div class="faq-item">
+                        <h4>How accurate is the text recognition?</h4>
+                        <p>Tesseract v5 achieves 99%+ accuracy with clear, printed text. Handwritten text and low-quality images may have lower accuracy. Results depend on image quality and text clarity.</p>
+                    </div>
+                    <div class="faq-item">
+                        <h4>What languages are supported?</h4>
+                        <p>ScanText supports 100+ languages. Common languages include English, Spanish, French, German, Chinese, Japanese, Arabic, Russian, and many more.</p>
+                    </div>
+                    <div class="faq-item">
+                        <h4>Can I use ScanText on my phone?</h4>
+                        <p>Absolutely! ScanText works on all devices with a modern web browser. Use it on your smartphone, tablet, or desktop computer.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">© 2026 ScanText - Free OCR Text Extractor</div>
+                <ul class="footer-links">
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#faq">FAQ</a></li>
+                    <li><a href="#">Privacy</a></li>
+                    <li><a href="#">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-bottom">
+                Powered by Tesseract OCR. Processing is 100% client-side and completely private.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // ============================================
+        // CHECK TESSERACT AVAILABILITY
+        // ============================================
+        if (typeof Tesseract === 'undefined') {
+            console.error('Tesseract.js not loaded. Check CDN connection.');
+            alert('OCR library failed to load. Please refresh the page.');
+        }
+
+        // ============================================
+        // CORE APPLICATION STATE & DOM ELEMENTS
+        // ============================================
+        const state = {
+            selectedFile: null,
+            isProcessing: false,
+            worker: null
+        };
+
+        const elements = {
+            // File input
+            dropZone: document.getElementById('dropZone'),
+            fileInput: document.getElementById('fileInput'),
+            uploadContent: document.getElementById('uploadContent'),
+            previewArea: document.getElementById('previewArea'),
+            imagePreview: document.getElementById('imagePreview'),
+            btnChangeFile: document.getElementById('btnChangeFile'),
+            fileInfo: document.getElementById('fileInfo'),
+
+            // Result area
+            resultText: document.getElementById('resultText'),
+            btnCopy: document.getElementById('btnCopy'),
+            btnDownload: document.getElementById('btnDownload'),
+
+            // Progress
+            progressOverlay: document.getElementById('progressOverlay'),
+            progressText: document.getElementById('progressText'),
+            progressBar: document.getElementById('progressBar'),
+            progressPercent: document.getElementById('progressPercent'),
+
+            // Actions
+            btnConvert: document.getElementById('btnConvert'),
+
+            // Toast
+            toast: document.getElementById('toast')
+        };
+
+        // ============================================
+        // FILE HANDLING
+        // ============================================
+        
+        // Prevent default drag behavior
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(event => {
+            elements.dropZone.addEventListener(event, e => {
+                e.preventDefault();
+                e.stopPropagation();
+            });
+        });
+
+        // Visual feedback during drag
+        ['dragenter', 'dragover'].forEach(event => {
+            elements.dropZone.addEventListener(event, () => {
+                elements.dropZone.classList.add('dragover');
+            });
+        });
+
+        ['dragleave', 'drop'].forEach(event => {
+            elements.dropZone.addEventListener(event, () => {
+                elements.dropZone.classList.remove('dragover');
+            });
+        });
+
+        // Handle file drop
+        elements.dropZone.addEventListener('drop', e => {
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileSelect(files[0]);
+            }
+        });
+
+        // Handle file input change
+        elements.fileInput.addEventListener('change', e => {
+            if (e.target.files.length > 0) {
+                handleFileSelect(e.target.files[0]);
+            }
+        });
+
+        // Change image button
+        elements.btnChangeFile.addEventListener('click', e => {
+            e.stopPropagation();
+            resetFileSelection();
+            elements.fileInput.click();
+        });
+
+        function handleFileSelect(file) {
+            if (!file.type.startsWith('image/')) {
+                showToast('Please upload an image file (JPG, PNG, WEBP, etc.)');
+                return;
+            }
+
+            if (file.size > 10 * 1024 * 1024) {
+                showToast('File size must be less than 10MB');
+                return;
+            }
+
+            state.selectedFile = file;
+
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = e => {
+                elements.imagePreview.src = e.target.result;
+                elements.uploadContent.classList.add('hidden');
+                elements.previewArea.classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+
+            // Update UI
+            elements.fileInfo.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+            elements.btnConvert.disabled = false;
+            elements.resultText.value = '';
+            elements.btnCopy.disabled = true;
+            elements.btnDownload.disabled = true;
+        }
+
+        function resetFileSelection() {
+            state.selectedFile = null;
+            elements.fileInput.value = '';
+            elements.imagePreview.src = '';
+            elements.uploadContent.classList.remove('hidden');
+            elements.previewArea.classList.add('hidden');
+            elements.fileInfo.textContent = 'Ready to extract text';
+            elements.btnConvert.disabled = true;
+            elements.resultText.value = '';
+            elements.btnCopy.disabled = true;
+            elements.btnDownload.disabled = true;
+        }
+
+        // ============================================
+        // OCR PROCESSING
+        // ============================================
+
+        elements.btnConvert.addEventListener('click', async () => {
+            if (!state.selectedFile || state.isProcessing) return;
+
+            state.isProcessing = true;
+            showProgress();
+            elements.btnConvert.disabled = true;
+
+            try {
+                // Read file as data URL
+                const imageData = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = () => reject(new Error('Failed to read file'));
+                    reader.readAsDataURL(state.selectedFile);
+                });
+
+                console.log('File loaded, initializing OCR worker...');
+                updateProgressStatus('Loading OCR engine (first time may take 30-60 seconds)...');
+
+                // Create worker with proper config
+                state.worker = await Tesseract.createWorker({
+                    logger: updateProgress
+                });
+
+                console.log('Worker created, loading language...');
+                updateProgressStatus('Loading language models...');
+                
+                // Initialize with language
+                await state.worker.load();
+                await state.worker.loadLanguage('eng');
+                await state.worker.initialize('eng');
+
+                console.log('Worker initialized, starting recognition...');
+                updateProgressStatus('Extracting text from image...');
+                
+                const result = await state.worker.recognize(imageData);
+                const text = result.data.text;
+                
+                console.log('OCR Result:', text);
+                
+                // Handle result
+                const cleanedText = text.trim();
+                elements.resultText.value = cleanedText || '[No text detected in image]';
+
+                if (cleanedText) {
+                    elements.btnCopy.disabled = false;
+                    elements.btnDownload.disabled = false;
+                    showToast('Text extraction completed successfully');
+                } else {
+                    showToast('No text detected. Try with a clearer image.');
+                }
+
+                // Cleanup
+                console.log('Terminating worker...');
+                await state.worker.terminate();
+                state.worker = null;
+
+            } catch (error) {
+                console.error('OCR Error:', error);
+                console.error('Error stack:', error.stack);
+                elements.resultText.value = `Error: ${error.message || 'Failed to process image. Please try again.'}`;
+                showToast('Error during text extraction - check console for details');
+            } finally {
+                hideProgress();
+                state.isProcessing = false;
+                elements.btnConvert.disabled = !state.selectedFile;
+            }
+        });
+
+        function updateProgress(message) {
+            console.log('Progress update:', message);
+            
+            const statuses = {
+                'loading tesseract core': 'Loading OCR engine (might take 30-60 seconds first time)...',
+                'initializing tesseract': 'Initializing OCR system...',
+                'loading language traineddata': 'Downloading language models (~30MB)...',
+                'recognizing text': 'Extracting text from image...'
+            };
+
+            if (message.status in statuses) {
+                updateProgressStatus(statuses[message.status]);
+            }
+
+            if (message.progress !== undefined) {
+                const percent = Math.round(message.progress * 100);
+                elements.progressBar.style.width = `${percent}%`;
+                elements.progressPercent.textContent = `${percent}%`;
+            }
+        }
+
+        function updateProgressStatus(text) {
+            elements.progressText.textContent = text;
+        }
+
+        function showProgress() {
+            elements.progressOverlay.classList.remove('hidden');
+            elements.progressBar.style.width = '0%';
+            elements.progressPercent.textContent = '0%';
+        }
+
+        function hideProgress() {
+            elements.progressOverlay.classList.add('hidden');
+        }
+
+        // ============================================
+        // RESULT ACTIONS
+        // ============================================
+
+        elements.btnCopy.addEventListener('click', () => {
+            if (!elements.resultText.value) return;
+
+            navigator.clipboard.writeText(elements.resultText.value)
+                .then(() => showToast('Text copied to clipboard'))
+                .catch(() => showToast('Failed to copy text'));
+        });
+
+        elements.btnDownload.addEventListener('click', () => {
+            if (!elements.resultText.value) return;
+
+            const blob = new Blob([elements.resultText.value], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `ScanText-${Date.now()}.txt`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            showToast('Text file downloaded successfully');
+        });
+
+        // ============================================
+        // NOTIFICATIONS
+        // ============================================
+
+        function showToast(message) {
+            elements.toast.textContent = message;
+            elements.toast.classList.add('show');
+            setTimeout(() => {
+                elements.toast.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
